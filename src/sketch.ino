@@ -1,6 +1,12 @@
-const int sensorPin = 0;
-const int relayPin = 2;
-const int ledPin   = 9;
+const int sensorPin    = 0;
+const int relayPin     = 2;
+const int ledPin       = 9;
+const int bounceBuffer = 1000;
+
+long onStart  = millis();
+long offStart = millis();
+
+bool on = false;
 
 int lightLevel;
 
@@ -14,12 +20,25 @@ void setup()
 void loop()
 {
   lightLevel = analogRead(sensorPin);
-  if (lightLevel < 500) {
-    digitalWrite(relayPin, HIGH);
-    digitalWrite(ledPin, HIGH);
+  Serial.println(lightLevel);
+  if (lightLevel < 300) {
+    if (on == false) {
+      onStart = millis();
+      on = true;
+    }
+    else if (millis() - onStart > bounceBuffer) {
+      digitalWrite(relayPin, HIGH);
+      digitalWrite(ledPin, HIGH);
+    }
   }
   else {
-    digitalWrite(relayPin, LOW);
-    digitalWrite(ledPin, LOW);
+    if (on == true) {
+      offStart = millis();
+      on = false;
+    }
+    else if (millis() - offStart > bounceBuffer) {
+      digitalWrite(relayPin, LOW);
+      digitalWrite(ledPin, LOW);
+    }
   }
 }
